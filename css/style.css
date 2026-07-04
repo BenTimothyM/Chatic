@@ -1,0 +1,153 @@
+/* Custom WhatsApp Styling Overrides and Transitions */
+body {
+  background-color: #0f172a;
+  /* Slate 900 */
+}
+
+/* WhatsApp Scrollbar Behavior */
+#chatBody::-webkit-scrollbar {
+  width: 6px;
+}
+
+#chatBody::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#chatBody::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 3px;
+}
+
+#chatBody::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+/* Slow spin visual for missing album art discs */
+.animate-spin-slow {
+  animation: spin 8s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* WhatsApp Bubble Bubble Tails */
+.bubble-in::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -8px;
+  width: 12px;
+  height: 12px;
+  background-color: #ffffff;
+  clip-path: polygon(100% 0, 0 0, 100% 100%);
+}
+
+.bubble-out::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: -8px;
+  width: 12px;
+  height: 12px;
+  background-color: #e1f3fc;
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+}
+
+/* WhatsApp Typing Bubbles CSS Animation */
+.typing-indicator-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #8c8c8c;
+  animation: typing-bounce 1.4s infinite ease-in-out;
+}
+
+.typing-indicator-dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.typing-indicator-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-indicator-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typing-bounce {
+
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+
+  40% {
+    transform: translateY(-5px);
+  }
+}
+
+/* Fullscreen pseudo-class styles for the device simulation wrapper */
+#deviceWrapper:fullscreen,
+#deviceWrapper:-webkit-full-screen {
+  max-width: 100% !important;
+  width: 100% !important;
+  height: 100% !important;
+  aspect-ratio: auto !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  ring: none !important;
+  --tw-ring-shadow: none !important;
+  background-color: #efeae2;
+}
+
+/* Hide the phone notch/bezel in fullscreen */
+#deviceWrapper:fullscreen>div:first-child,
+#deviceWrapper:-webkit-full-screen>div:first-child {
+  display: none !important;
+}
+
+/* Remove ring utility in fullscreen */
+#deviceWrapper:fullscreen {
+  --tw-ring-offset-shadow: 0 0 #0000 !important;
+  --tw-ring-shadow: 0 0 #0000 !important;
+}
+
+/* Adjust chat header padding (no notch, so less top padding) */
+#deviceWrapper:fullscreen .bg-\[#008069\] {
+  padding-top: 0.75rem !important;
+}
+
+/* Wider, more readable chat area in fullscreen */
+#deviceWrapper:fullscreen #chatBody {
+  padding: 24px !important;
+  max-width: 800px;
+  margin: 0 auto;
+  font-size: 1rem;
+}
+
+/* Scale up bubble text for fullscreen readability */
+#deviceWrapper:fullscreen #chatBody .text-sm {
+  font-size: 1rem !important;
+  line-height: 1.5 !important;
+}
+
+#deviceWrapper:fullscreen #chatBody .text-\[10px\] {
+  font-size: 0.75rem !important;
+}
+
+/* Center the bottom input bar content */
+#deviceWrapper:fullscreen .bg-\[\#f0f2f5\] {
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
