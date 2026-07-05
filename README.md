@@ -29,25 +29,6 @@ By uploading a structured lyric or audio timestamp file, the application parses 
 - **Markup & Styling:** HTML5 & Tailwind CSS / Modern CSS3 for highly responsive and modular styling.
 - **Scripting:** Vanilla JavaScript (ES6+) for file processing, text parsing, and dynamic DOM rendering.
 
-## 🚀 Getting Started
-
-Getting Chatic up and running locally takes less than a minute:
-
-1. **Clone the Repository**
-   Open your terminal or command prompt and run:
-  ```bash
-  git clone [https://github.com/BenTimothyM/Chatic.git](https://github.com/BenTimothyM/Chatic.git)
-  ```
-
-2. **Launch the Application**
-Navigate into the project directory and open the main `index.html` file in any modern web browser (Chrome, Edge, Brave, or Firefox):
-  ```bash
-  cd Chatic
-  start index.html  # For Windows
-  open index.html   # For macOS
-  ```
-
-
 ## 💡 How It Works
 
 1. **Upload:** Use the control panel to upload your target lyric/text file.
