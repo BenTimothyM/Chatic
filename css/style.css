@@ -4,6 +4,19 @@ body {
   /* Slate 900 */
 }
 
+/* Force Title Fonts */
+.web-title-poppins {
+  font-family: 'Poppins', sans-serif !important;
+  font-weight: 700 !important;
+  font-style: normal !important;
+}
+
+.web-desc-montserrat {
+  font-family: 'Montserrat', sans-serif !important;
+  font-weight: 300 !important;
+  font-style: italic !important;
+}
+
 /* WhatsApp Scrollbar Behavior */
 #chatBody::-webkit-scrollbar {
   width: 6px;
@@ -35,6 +48,16 @@ body {
   to {
     transform: rotate(360deg);
   }
+}
+
+/* High Fidelity WhatsApp Wallpaper dengan Background Gambar */
+.whatsapp-doodle-overlay {
+  background-color: #0b141a;
+  background-image: url('../images/background.jfif');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.5;
 }
 
 /* WhatsApp Bubble Bubble Tails */
