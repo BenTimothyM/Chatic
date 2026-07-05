@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chatic (IPhone UI) - WhatsApp Lyric Sync & Video Recorder</title>
+  <link rel="icon" type="image/png" href="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg">
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome for Authentic WhatsApp Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- jsmediatags CDN for ID3 metadata parsing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
+  <!-- html2canvas CDN for high fidelity frame rendering -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@1,300&family=Poppins:wght@700&display=swap"
+    rel="stylesheet">
+  <!-- App Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body
+  class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-teal-500 selection:text-white">
+
+  <!-- Header -->
+  <header class="bg-slate-800 border-b border-slate-700 py-4 px-6 shadow-md">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div class="flex items-center space-x-3">
+        <div class="bg-[#007aff] text-white p-2.5 rounded-xl shadow-inner">
+          <i class="fa-brands fa-whatsapp text-2xl"></i>
+        </div>
+        <div>
+          <h1 class="web-title text-xl font-bold tracking-tight">C H A T I C</h1>
+          <p class="web-desc text-xs text-slate-400">IPhone Interface</p>
+        </div>
+      </div>
+      <!-- Status Badge -->
+      <div id="statusBadge"
+        class="bg-slate-700 text-xs px-3 py-1.5 rounded-full font-medium text-slate-300 flex items-center gap-2 border border-slate-600">
+        <span class="w-2 h-2 rounded-full bg-slate-400 animate-pulse"></span> Idle
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- Left Panel: Controls & Workspace (7 cols) -->
+    <section class="lg:col-span-7 flex flex-col space-y-6">
+
+      <!-- Audio & LRC Upload Area -->
+      <div class="bg-slate-800 rounded-2xl p-6 border border-slate-700 shadow-sm flex flex-col space-y-4">
+        <h2 class="text-lg font-semibold text-[#007aff] flex items-center gap-2">
+          <i class="fa-solid fa-cloud-arrow-up"></i> 1. Load Audio & Lyrics
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Audio Dropzone -->
+          <div id="audioDropzone"
+            class="border-2 border-dashed border-slate-600 hover:border-[#007aff] rounded-xl p-5 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300 bg-slate-900/50">
+            <input type="file" id="audioInput" accept="audio/mp3,audio/wav,audio/m4a" class="hidden">
+            <i class="fa-solid fa-music text-3xl text-slate-400 mb-2"></i>
+            <span class="text-sm font-semibold text-slate-200">Upload MP3/Audio File</span>
+            <span class="text-xs text-slate-500 mt-1">Drag & drop or click to browse</span>
+            <span id="audioFileName" class="text-xs text-[#007aff] mt-2 font-mono truncate max-w-full"></span>
+          </div>
+
+          <!-- Lyrics Mode Selector / Upload -->
+          <div class="flex flex-col space-y-3 justify-between">
+            <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700">
+              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Lyric Source
+                Mode</label>
+              <div class="grid grid-cols-3 gap-2">
+                <button id="modeApiBtn"
+                  class="bg-[#007aff] text-white py-1.5 px-2 rounded-lg text-xs font-semibold hover:bg-blue-600 transition-colors">API
+                  Fetch</button>
+                <button id="modeLrcBtn"
+                  class="bg-slate-700 text-slate-300 py-1.5 px-2 rounded-lg text-xs font-semibold hover:bg-slate-600 transition-colors">LRC
+                  File</button>
+                <button id="modeManualBtn"
+                  class="bg-slate-700 text-slate-300 py-1.5 px-2 rounded-lg text-xs font-semibold hover:bg-slate-600 transition-colors">Manual
+                  Sync</button>
+              </div>
+            </div>
+
+            <div id="lrcUploadArea"
+              class="hidden border-2 border-dashed border-slate-600 hover:border-blue-500 rounded-xl p-3 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300 bg-slate-900/50">
+              <input type="file" id="lrcFileInput" accept=".lrc" class="hidden">
+              <span class="text-xs font-semibold text-slate-300">Upload LRC File</span>
+              <span id="lrcFileName" class="text-[10px] text-blue-400 mt-1 font-mono truncate max-w-full"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Metadata & Track Detail Display -->
+        <div id="metadataPanel"
+          class="hidden bg-slate-900/80 p-4 rounded-xl border border-slate-700 flex items-center space-x-4">
+          <div id="albumArtPlaceholder"
+            class="w-16 h-16 rounded-lg bg-slate-800 flex items-center justify-center text-slate-500 shadow border border-slate-700">
+            <i class="fa-solid fa-compact-disc text-2xl animate-spin-slow"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p id="trackTitle" class="text-sm font-semibold text-white truncate">Track Title</p>
+            <p id="trackArtist" class="text-xs text-slate-400 truncate">Unknown Artist</p>
+            <div class="mt-2 flex items-center space-x-2">
+              <span
+                class="text-[10px] bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded border border-blue-500/20 font-mono">ID3
+                Tag Extracted</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Manual Sync Dashboard Area -->
+      <div id="manualSyncSection"
+        class="hidden bg-slate-800 rounded-2xl p-6 border border-slate-700 shadow-sm flex flex-col space-y-4">
+        <h2 class="text-lg font-semibold text-amber-400 flex items-center gap-2">
+          <i class="fa-solid fa-clock"></i> Manual Sync Engine
+        </h2>
+        <p class="text-xs text-slate-400 leading-relaxed">
+          Paste your plain text lyrics below. Play the audio and tap <kbd
+            class="px-2 py-1 bg-slate-700 rounded text-amber-300 font-mono text-xs font-bold">SPACE</kbd> or click the
+          trigger button in real-time to stamp the current line.
+        </p>
+        <textarea id="manualTextInput" placeholder="Paste your unsynced, line-separated text lyrics here..."
+          class="w-full h-32 bg-slate-950 border border-slate-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none font-mono text-slate-300 resize-none"></textarea>
+
+        <div
+          class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 bg-slate-900/50 p-3 rounded-xl border border-slate-700">
+          <div class="text-xs text-slate-400">
+            <div>Tagged Lines: <span id="manualSyncCount" class="font-bold text-amber-400">0</span> / <span
+                id="manualTotalLines">0</span></div>
+            <div class="font-mono text-[10px] text-slate-500 truncate" id="nextManualLinePreview">Next: [Waiting for
+              data...]</div>
+          </div>
+          <button id="tagStampBtn" disabled
+            class="bg-amber-600 text-slate-950 py-2.5 px-5 rounded-lg text-xs font-extrabold hover:bg-amber-500 transition-colors disabled:opacity-40 flex items-center justify-center gap-2">
+            <i class="fa-solid fa-stopwatch"></i> STAMP CURRENT TIME
+          </button>
+        </div>
+      </div>
+
+      <!-- Audio Element Container -->
+      <div class="bg-slate-800 rounded-2xl p-6 border border-slate-700 shadow-sm flex flex-col space-y-4">
+        <h2 class="text-lg font-semibold text-slate-200 flex items-center gap-2">
+          <i class="fa-solid fa-volume-high"></i> Audio Playback Control
+        </h2>
+        <audio id="audioPlayer" controls class="w-full outline-none rounded-lg bg-slate-950"></audio>
+      </div>
+
+      <!-- Recording and Export Center -->
+      <div class="bg-slate-800 rounded-2xl p-6 border border-slate-700 shadow-sm flex flex-col space-y-4">
+        <h2 class="text-lg font-semibold text-blue-400 flex items-center gap-2">
+          <i class="fa-solid fa-video"></i> Video Export Studio
+        </h2>
+        <p class="text-xs text-slate-400 leading-relaxed">
+          Record your simulation visual frame-by-frame merged with high-quality source audio locally in your browser.
+          Ensure the browser remains active while processing frames.
+        </p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <button id="startRecordBtn" disabled
+            class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-xl text-xs transition-colors disabled:opacity-40 flex items-center justify-center gap-2 shadow-sm shadow-blue-950">
+            <i class="fa-solid fa-circle-dot animate-pulse"></i> Start Screen Record
+          </button>
+          <button id="stopRecordBtn" disabled
+            class="bg-rose-600 hover:bg-rose-500 text-white font-bold py-3 px-4 rounded-xl text-xs transition-colors disabled:opacity-40 flex items-center justify-center gap-2 shadow-sm shadow-rose-900/40">
+            <i class="fa-solid fa-square"></i> Stop & Download
+          </button>
+        </div>
+
+        <!-- Recording progress indicator -->
+        <div id="recordingProgress"
+          class="hidden flex items-center space-x-3 bg-slate-900 p-3 rounded-xl border border-slate-700">
+          <span class="relative flex h-3 w-3">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-3 w-3 bg-rose-500"></span>
+          </span>
+          <span class="text-xs text-rose-400 font-mono tracking-wider font-semibold uppercase animate-pulse">Recording
+            Active... Do not switch tabs.</span>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Right Panel: WhatsApp iOS UI Simulation (5 cols) -->
+    <section class="lg:col-span-5 flex flex-col items-center justify-start">
+
+      <!-- Device Wrapper with iOS Dark Bezel Layout -->
+      <div id="deviceWrapper"
+        class="whatsapp-chat-scope w-full max-w-[375px] aspect-[9/16] bg-[#0b141a] rounded-[45px] border-[12px] border-slate-950 shadow-2xl overflow-hidden relative flex flex-col ring-4 ring-slate-800/80">
+
+        <!-- iOS Notch / Dynamic Island Overlay -->
+        <div
+          class="absolute top-0 left-1/2 -translate-x-1/2 h-[26px] w-[110px] bg-slate-950 rounded-b-2xl z-50 flex justify-center items-center">
+          <span class="w-3 h-3 rounded-full bg-[#1a1a1a] block ml-auto mr-4"></span>
+        </div>
+
+        <!-- Simulated iOS Status Bar -->
+        <div
+          class="bg-[#111b21] text-[#e9edef] px-6 pt-1 pb-1 flex justify-between items-center text-[11px] font-semibold select-none z-40 relative border-b border-[#222e35]/30">
+          <span id="iosClock">8:09</span>
+          <div class="flex items-center space-x-1.5">
+            <i class="fa-solid fa-signal text-[10px]"></i>
+            <span class="text-[9px]">LTE</span>
+            <i class="fa-solid fa-wifi text-[10px]"></i>
+            <div class="flex items-center space-x-0.5 bg-slate-700/60 rounded px-1 py-0.2">
+              <span class="text-[9px] scale-[0.95]">87%</span>
+              <i class="fa-solid fa-battery-three-quarters text-[10px] text-emerald-400"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- WhatsApp Chat Header Container (iOS Style) -->
+        <div
+          class="bg-[#111b21] text-[#e9edef] py-2 px-3.5 flex items-center justify-between shadow-md z-40 relative border-b border-[#222e35]">
+          <div class="flex items-center space-x-2">
+            <!-- iOS Back Button -->
+            <button class="text-[#007aff] hover:opacity-80 transition-opacity mr-0.5 flex items-center space-x-0.5">
+              <i class="fa-solid fa-chevron-left text-base font-bold"></i>
+            </button>
+
+            <!-- Chat Profile Picture -->
+            <div class="relative">
+              <div id="chatAvatar"
+                class="w-9 h-9 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center font-bold overflow-hidden border border-slate-700 shadow-inner">
+                <i class="fa-solid fa-user text-md"></i>
+              </div>
+            </div>
+
+            <!-- Header Text Context -->
+            <div class="flex flex-col min-w-0 max-w-[140px]">
+              <span id="chatContactName" class="text-[13px] font-bold text-[#e9edef] truncate">Select Track</span>
+              <span id="chatSubStatus" class="text-[9px] text-[#8696a0] font-normal truncate">online</span>
+            </div>
+          </div>
+
+          <!-- iOS Header Action Icons -->
+          <div class="flex items-center space-x-4 text-[#007aff] text-base">
+            <button class="hover:opacity-80"><i class="fa-solid fa-video"></i></button>
+            <button class="hover:opacity-80"><i class="fa-solid fa-phone"></i></button>
+            <button id="fullscreenBtn" class="hover:opacity-80 text-[#8696a0] transition-transform hover:scale-110"
+              title="Toggle Fullscreen">
+              <i class="fa-solid fa-expand text-sm"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- WhatsApp Interactive Chat Wall Canvas Area -->
+        <div id="chatCanvasWrapper" class="flex-1 overflow-hidden relative flex flex-col h-full bg-[#0b141a]">
+          <!-- WhatsApp iOS Dark Wallpaper Doodle Asset Layer -->
+          <div class="whatsapp-doodle-overlay absolute inset-0 pointer-events-none"></div>
+
+          <!-- Scrolling chat container -->
+          <div id="chatBody"
+            class="flex-1 overflow-y-auto px-3.5 py-4 space-y-2 flex flex-col justify-start relative z-10 scroll-smooth">
+            <!-- Initial System Info -->
+            <div
+              class="self-center bg-[#202c33]/80 text-[#8696a0] text-[9px] px-3 py-1.5 rounded-lg shadow-sm text-center select-none max-w-[90%] border border-slate-700/20">
+              <i class="fa-solid fa-lock text-[8px] mr-1 text-[#8696a0]/80"></i> Messages are fully simulated locally
+              and synced with the active track timeline.
+            </div>
+          </div>
+        </div>
+
+        <!-- WhatsApp Chat Bottom Input Sim Bar (iOS Style) -->
+        <div class="bg-[#111b21] px-3 py-2 flex items-center space-x-2 border-t border-[#222e35] relative z-40">
+          <!-- Blue iOS Plus Button -->
+          <button class="text-[#007aff] hover:opacity-80 text-xl font-light w-6 h-6 flex items-center justify-center">
+            <i class="fa-solid fa-plus"></i>
+          </button>
+
+          <!-- Input Pill Capsule -->
+          <div class="flex-1 bg-[#202c33] rounded-full py-1 px-3.5 flex items-center space-x-2 border-none">
+            <input type="text" placeholder="Type a message" disabled
+              class="w-full text-xs bg-transparent outline-none text-[#e9edef] placeholder-[#8696a0]/70">
+            <!-- Internal iOS Sticker / Input Option Indicator -->
+            <button class="text-[#007aff] hover:opacity-80 text-sm">
+              <i class="fa-regular fa-note-sticky"></i>
+            </button>
+          </div>
+
+          <!-- Quick Media Utility Controls on Footer Right -->
+          <div class="flex items-center space-x-3 text-[#007aff] text-lg pl-1">
+            <button class="hover:opacity-80"><i class="fa-solid fa-camera"></i></button>
+            <button class="hover:opacity-80"><i class="fa-solid fa-microphone"></i></button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Controls for Alignment Behavior -->
+      <div class="mt-4 w-full max-w-[375px] bg-slate-800 rounded-xl p-4 border border-slate-700 space-y-2 text-xs">
+        <label class="block text-slate-400 font-semibold mb-1">Chat Configuration Mode</label>
+        <div class="grid grid-cols-1 gap-2">
+          <label
+            class="flex items-center space-x-2.5 bg-slate-900 p-2.5 rounded-lg border border-slate-700 cursor-pointer">
+            <input type="radio" name="alignmentMode" value="conversational" checked class="text-blue-500 focus:ring-0">
+            <div>
+              <p class="font-semibold text-slate-200">Conversational / Alternate Mode</p>
+              <p class="text-[10px] text-slate-500">Alternate sides with dual-side context-aware typing</p>
+            </div>
+          </label>
+          <label
+            class="flex items-center space-x-2.5 bg-slate-900 p-2.5 rounded-lg border border-slate-700 cursor-pointer">
+            <input type="radio" name="alignmentMode" value="incoming" class="text-blue-500 focus:ring-0">
+            <div>
+              <p class="font-semibold text-slate-200">Left-Only Mode (Incoming Only)</p>
+              <p class="text-[10px] text-slate-500">All lyric bubbles and typing indicators render on the Left</p>
+            </div>
+          </label>
+          <label
+            class="flex items-center space-x-2.5 bg-slate-900 p-2.5 rounded-lg border border-slate-700 cursor-pointer">
+            <input type="radio" name="alignmentMode" value="outgoing" class="text-blue-500 focus:ring-0">
+            <div>
+              <p class="font-semibold text-slate-200">Right-Only Mode (Outgoing Only)</p>
+              <p class="text-[10px] text-slate-500">All lyric bubbles and typing indicators render on the Right</p>
+            </div>
+          </label>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Elegant Branding, Credit, and Support Footer Container -->
+  <footer class="bg-slate-950 border-t border-slate-800 py-6 mt-12">
+    <div
+      class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-400">
+      <div>
+        <p>Created by <a href="https://github.com/BenTimothyM" target="_blank" rel="noopener"
+            class="text-[#007aff] hover:underline font-semibold">Ben Timothy</a> • <a
+            href="https://github.com/BenTimothyM/Chatic" class="text-slate-300 hover:underline"><i
+              class="fa-brands fa-github"></i> Repository</a></p>
+      </div>
+      <div class="flex items-center space-x-3">
+        <span class="text-slate-500">Support development:</span>
+        <a href="https://saweria.co/nnebdev" target="_blank" rel="noopener"
+          class="bg-[#ff5f5f] text-white font-extrabold px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 hover:scale-105 transition-transform">
+          <i class="fa-solid fa-mug-hot"></i> Support on Saweria
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- App Main Core Coordinator File Direct Load -->
+  <script type="module" src="js/app.js"></script>
+</body>
+
+</html>
